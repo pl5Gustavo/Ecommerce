@@ -1,77 +1,173 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Checkout | PangolesGames</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  <nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">PangolesGames</a>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
+      <img src="IMG/banner.png" height="40" class="me-2" style="border-radius:5px;">
+      PangolesGames
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="produtos.html">Produtos</a></li>
+        <li class="nav-item"><a class="nav-link" href="busca.html">Busca</a></li>
+        <li class="nav-item"><a class="nav-link" href="carrinho.html">Carrinho</a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+        <li class="nav-item"><a class="nav-link" href="registro.html">Registrar-se</a></li>
+
+      </ul>
     </div>
-  </nav>
+
+  </div>
+</nav>
+
+
 
   <main class="container py-5">
     <h1 class="text-center fw-bold mb-4">Finalizar Compra</h1>
+    <div id="itens"></div>
 
-    <div id="produto-selecionado" class="mb-4"></div>
+    <form id="form-checkout" class="mx-auto" style="max-width:700px">
+      <h5>Dados de entrega</h5>
+      <div class="mb-3"><label class="form-label">Nome completo</label><input id="nome" class="form-control" required></div>
+      <div class="mb-3"><label class="form-label">Email</label><input id="email" type="email" class="form-control" required></div>
+      <div class="mb-3"><label class="form-label">CEP</label><input id="cep" class="form-control" required></div>
+      <div class="mb-3"><label class="form-label">Endereço (Rua, Número, Bairro)</label><input id="endereco" class="form-control" required></div>
+      <div class="mb-3"><label class="form-label">Cidade</label><input id="cidade" class="form-control" required></div>
+      <div class="mb-3"><label class="form-label">Estado</label><input id="estado" class="form-control" required></div>
 
-    <form id="form-checkout" class="mx-auto" style="max-width:600px">
-      <div class="mb-3">
-        <label class="form-label">Nome</label>
-        <input id="nome" class="form-control" required>
+      <h5 class="mt-4">Pagamento</h5>
+      <select id="pagamento" class="form-select mb-3" required>
+        <option value="">Selecione</option>
+        <option value="cartao">Cartão</option>
+        <option value="pix">PIX</option>
+        <option value="boleto">Boleto</option>
+      </select>
+
+      <div id="pag-extra" class="mb-3"></div>
+
+      <div class="d-grid mt-3">
+        <button class="btn btn-success" type="submit">Confirmar compra</button>
       </div>
-      <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input id="email" type="email" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Endereço</label>
-        <input id="endereco" class="form-control" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Pagamento</label>
-        <select id="pagamento" class="form-select" required>
-          <option value="">Selecione</option>
-          <option value="cartao">Cartão</option>
-          <option value="pix">PIX</option>
-          <option value="boleto">Boleto</option>
-        </select>
-      </div>
-      <button class="btn btn-success w-100" type="submit">Confirmar Compra</button>
     </form>
   </main>
 
-  <footer class="bg-dark text-white text-center py-3">© 2025 PangolesGames</footer>
+  <footer class="bg-dark text-white text-center py-3 mt-4">© 2025 PangolesGames</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // carrega item específico salvo por comprarAgora (ou checkoutItems)
-    const produtoCheckout = JSON.parse(localStorage.getItem('produtoCheckout'));
-    const checkoutItems = JSON.parse(localStorage.getItem('checkoutItems')) || [];
-    const target = document.getElementById('produto-selecionado');
+    function brl(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});}
+    const frete = 30;
+    const items = JSON.parse(localStorage.getItem('checkoutItems')) || [];
 
-    if (produtoCheckout) {
-      target.innerHTML = `<div class="card p-3 mb-3"><h5>${produtoCheckout.nome}</h5><p class="text-success">R$ ${produtoCheckout.preco.toFixed(2)}</p></div>`;
-    } else if (checkoutItems.length) {
-      let html = '<div class="card p-3 mb-3"><h5>Itens:</h5><ul>';
-      checkoutItems.forEach(i => html += `<li>${i.nome} — R$ ${i.preco.toFixed(2)} x${i.quantidade}</li>`);
-      html += '</ul></div>';
-      target.innerHTML = html;
+    const itensDiv = document.getElementById('itens');
+    if (!items.length) {
+      itensDiv.innerHTML = '<p class="text-center text-muted">Nenhum item selecionado para checkout.</p>';
     } else {
-      target.innerHTML = '<p class="text-muted">Nenhum produto selecionado.</p>';
+      let html = '<div class="card p-3 mb-4"><h5>Itens</h5><ul class="list-unstyled">';
+      let subtotal = 0;
+      items.forEach(i => { subtotal += i.preco * i.quantidade; html += `<li>${i.nome} x${i.quantidade} — R$ ${brl(i.preco * i.quantidade)}</li>`; });
+      html += `</ul><p class="mb-1">Subtotal: <strong>R$ ${brl(subtotal)}</strong></p><p>Frete: <strong>R$ ${brl(frete)}</strong></p><h5>Total: R$ ${brl(subtotal + frete)}</h5></div>`;
+      itensDiv.innerHTML = html;
     }
 
+    document.getElementById('pagamento').addEventListener('change', e => {
+      const box = document.getElementById('pag-extra');
+      if (e.target.value === 'cartao') {
+        box.innerHTML = `<input id="cart-nome" class="form-control mb-2" placeholder="Nome no cartão"><input id="cart-num" class="form-control mb-2" placeholder="Número do cartão">`;
+      } else if (e.target.value === 'pix') {
+        box.innerHTML = `<p>PIX: após confirmar, use a chave: <strong>pix@pangolesgames.com</strong></p>`;
+      } else if (e.target.value === 'boleto') {
+        box.innerHTML = `<p>Será gerado um boleto fictício.</p>`;
+      } else box.innerHTML = '';
+    });
+
+    function gerarCodigo(tipo) {
+      // gera códigos fictícios
+      if (tipo === 'pix') return 'PIX' + Math.floor(Math.random()*1e12);
+      if (tipo === 'boleto') return '23791.' + Math.floor(Math.random()*1e11);
+      return 'CARD' + Math.floor(Math.random()*1e9);
+    }
+
+    // ao submeter, validamos, criamos o pedido e atualizamos estoque
     document.getElementById('form-checkout').addEventListener('submit', e => {
       e.preventDefault();
-      alert('Compra finalizada! Obrigado por comprar na PangolesGames 🎮');
-      // limpa carrinho e dados de checkout
+      if (!items.length) { alert('Nenhum item para comprar.'); return; }
+
+      // coletar dados
+      const cliente = {
+        nome: document.getElementById('nome').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        cep: document.getElementById('cep').value.trim(),
+        endereco: document.getElementById('endereco').value.trim(),
+        cidade: document.getElementById('cidade').value.trim(),
+        estado: document.getElementById('estado').value.trim()
+      };
+      if (!cliente.nome || !cliente.email) { alert('Preencha nome e email.'); return; }
+
+      const metodo = document.getElementById('pagamento').value;
+      if (!metodo) { alert('Escolha o método de pagamento.'); return; }
+
+      // gerar codigo de pagamento fictício
+      const codigoPagamento = gerarCodigo(metodo);
+
+      // calcula total
+      const subtotal = items.reduce((acc,i) => acc + i.preco * i.quantidade, 0);
+      const total = subtotal + frete;
+
+      // reduzir estoque
+      const estoque = JSON.parse(localStorage.getItem('estoque')) || {};
+      let ok = true;
+      items.forEach(it => {
+        const atual = estoque[it.id] ?? 0;
+        if (it.quantidade > atual) ok = false;
+      });
+      if (!ok) { alert('Algum item excede o estoque disponível. Volte ao carrinho e ajuste.'); return; }
+
+      // aplica redução
+      items.forEach(it => { estoque[it.id] -= it.quantidade; if (estoque[it.id] < 0) estoque[it.id] = 0; });
+      localStorage.setItem('estoque', JSON.stringify(estoque));
+
+      // criar pedido
+      const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+      const pedido = {
+        id: Date.now(),
+        itens: items,
+        cliente,
+        total,
+        subtotal,
+        frete,
+        metodo,
+        codigoPagamento,
+        status: 'Pendente',
+        data: new Date().toISOString()
+      };
+      pedidos.push(pedido);
+      localStorage.setItem('pedidos', JSON.stringify(pedidos));
+
+      // limpar carrinho e checkoutItems
       localStorage.removeItem('carrinho');
-      localStorage.removeItem('produtoCheckout');
       localStorage.removeItem('checkoutItems');
+
+      // mostrar resumo ao usuário (pode ser substituído por página de agradecimento)
+      alert(`Compra confirmada!\nPedido ID: ${pedido.id}\nTotal: R$ ${brl(total)}\nCódigo: ${codigoPagamento}`);
+
+      // redirecionar para index
       window.location.href = 'index.html';
     });
   </script>

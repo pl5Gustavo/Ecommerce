@@ -7,243 +7,128 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">PangolesGames</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
-          <li class="nav-item"><a class="nav-link" href="produtos.html">Produtos</a></li>
-          <li class="nav-item"><a class="nav-link active" href="#">Carrinho</a></li>
-        </ul>
-      </div>
+  <div class="container">
+    
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
+      <img src="IMG/banner.png" height="40" class="me-2" style="border-radius:5px;">
+      PangolesGames
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="produtos.html">Produtos</a></li>
+        <li class="nav-item"><a class="nav-link" href="busca.html">Busca</a></li>
+        <li class="nav-item"><a class="nav-link" href="carrinho.html">Carrinho</a></li>
+
+        
+        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+        <li class="nav-item"><a class="nav-link" href="registro.html">Registrar-se</a></li>
+
+      </ul>
     </div>
-  </nav>
+
+  </div>
+</nav>
+
+
 
   <!-- Conteúdo principal -->
   <main class="container py-5">
     <h1 class="text-center fw-bold mb-4">🛒 Seu Carrinho</h1>
-
-    <!-- Tabela / cards do carrinho -->
     <div id="cart-area"></div>
 
-    <!-- Resumo lateral / abaixo -->
     <div id="checkout-area" class="mt-4"></div>
   </main>
 
   <footer class="bg-dark text-white text-center py-3 mt-5">© 2025 PangolesGames</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // Helper para formatar como reais
-    function brl(num) {
-      return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    // Lê carrinho do localStorage
+    function brl(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});}
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-
     const cartArea = document.getElementById('cart-area');
     const checkoutArea = document.getElementById('checkout-area');
 
-    // Renderiza a lista de itens e o bloco de checkout
     function render() {
-      if (!carrinho || carrinho.length === 0) {
+      if (!carrinho.length) {
         cartArea.innerHTML = '<p class="text-center text-muted">Seu carrinho está vazio.</p>';
         checkoutArea.innerHTML = '';
         return;
       }
-
-      // Monta tabela com os itens
-      let html = `
-        <div class="table-responsive">
-          <table class="table align-middle">
-            <thead class="table-dark">
-              <tr>
-                <th>Produto</th>
-                <th>Preço unit.</th>
-                <th>Quantidade</th>
-                <th>Subtotal</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
       let total = 0;
-      carrinho.forEach((item, idx) => {
-        const subtotal = item.preco * item.quantidade;
+      let html = `<div class="table-responsive"><table class="table align-middle"><thead class="table-dark"><tr><th>Produto</th><th>Preço unit.</th><th>Qtd</th><th>Subtotal</th><th></th></tr></thead><tbody>`;
+      carrinho.forEach((it, idx) => {
+        const subtotal = it.preco * it.quantidade;
         total += subtotal;
-
-        html += `
-          <tr>
-            <td style="width:40%;">
-              <div class="d-flex align-items-center">
-                <img src="${item.imagem}" alt="${item.nome}" style="height:64px; width:64px; object-fit:contain;" class="me-3">
-                <div>
-                  <div class="fw-bold">${item.nome}</div>
-                </div>
-              </div>
-            </td>
-            <td>R$ ${brl(item.preco)}</td>
-            <td style="width:200px;">
-              <div class="d-flex align-items-center">
-                <button class="btn btn-sm btn-outline-secondary me-2" onclick="changeQty(${idx}, -1)">−</button>
-                <input type="number" min="1" value="${item.quantidade}" onchange="setQty(${idx}, this.value)" class="form-control form-control-sm text-center" style="width:80px;">
-                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="changeQty(${idx}, +1)">+</button>
-              </div>
-            </td>
-            <td>R$ ${brl(subtotal)}</td>
-            <td><button class="btn btn-sm btn-danger" onclick="removeItem(${idx})">Remover</button></td>
-          </tr>
-        `;
+        html += `<tr>
+          <td style="width:40%;"><div class="d-flex align-items-center">
+            <img src="${it.imagem}" alt="${it.nome}" style="height:64px; width:64px; object-fit:contain;" class="me-3">
+            <div class="fw-bold">${it.nome}</div>
+          </div></td>
+          <td>R$ ${brl(it.preco)}</td>
+          <td>
+            <div class="d-flex align-items-center">
+              <button class="btn btn-sm btn-outline-secondary me-2" onclick="changeQty(${idx}, -1)">−</button>
+              <input type="number" min="1" value="${it.quantidade}" onchange="setQty(${idx}, this.value)" class="form-control form-control-sm text-center" style="width:80px;">
+              <button class="btn btn-sm btn-outline-secondary ms-2" onclick="changeQty(${idx}, +1)">+</button>
+            </div>
+          </td>
+          <td>R$ ${brl(subtotal)}</td>
+          <td><button class="btn btn-sm btn-danger" onclick="removeItem(${idx})">Remover</button></td>
+        </tr>`;
       });
-
-      html += `
-            </tbody>
-          </table>
-        </div>
-      `;
-
+      html += `</tbody></table></div>`;
       cartArea.innerHTML = html;
 
-      // Área de checkout: mostra subtotal, escolha de frete simplificada e seleção de pagamento
       checkoutArea.innerHTML = `
         <div class="card p-3">
-          <h5 class="fw-bold">Resumo do pedido</h5>
-          <p class="mb-1">Subtotal: <strong>R$ ${brl(total)}</strong></p>
-          <p class="mb-3 text-muted">Frete: calculado no checkout (simulação)</p>
+          <h5 class="fw-bold">Resumo</h5>
+          <p>Subtotal: <strong>R$ ${brl(total)}</strong></p>
+          <p>Frete: <strong>R$ 30,00</strong></p>
+          <h5>Total: <strong>R$ ${brl(total + 30)}</strong></h5>
 
-          <label class="form-label fw-bold">Escolha o método de pagamento:</label>
-          <select id="metodoPagamento" class="form-select mb-3">
-            <option value="cartao">Cartão de crédito</option>
-            <option value="pix">PIX</option>
-            <option value="boleto">Boleto bancário</option>
-          </select>
-
-          <div id="pagamento-extra" class="mb-3"></div>
-
-          <div class="d-grid gap-2">
-            <button class="btn btn-success" onclick="confirmarCompra()">Confirmar compra</button>
-            <button class="btn btn-outline-secondary" onclick="continuarComprando()">Continuar comprando</button>
+          <div class="d-grid gap-2 mt-3">
+            <button class="btn btn-success" onclick="goToCheckout()">Finalizar compra</button>
+            <button class="btn btn-outline-secondary" onclick="window.location.href='produtos.html'">Continuar comprando</button>
           </div>
         </div>
       `;
-
-      // quando trocar o método de pagamento, atualiza a área extra
-      document.getElementById('metodoPagamento').addEventListener('change', renderPagamentoExtra);
-      renderPagamentoExtra(); // inicializa
     }
 
-    // altera quantidade por +1 / -1
-    function changeQty(index, delta) {
-      const q = carrinho[index].quantidade + delta;
+    function changeQty(i, delta) {
+      let q = carrinho[i].quantidade + delta;
       if (q < 1) return;
-      carrinho[index].quantidade = q;
-      salvarRender();
+      // checar estoque local: pega estoque do localStorage
+      const estoque = JSON.parse(localStorage.getItem('estoque')) || {};
+      const available = estoque[carrinho[i].id] ?? 0;
+      if (q > available) { alert('Quantidade maior que estoque disponível.'); return; }
+      carrinho[i].quantidade = q; salvarRender();
+    }
+    function setQty(i, v) {
+      let q = parseInt(v); if (isNaN(q) || q < 1) q = 1;
+      const estoque = JSON.parse(localStorage.getItem('estoque')) || {};
+      const available = estoque[carrinho[i].id] ?? 0;
+      if (q > available) { alert('Quantidade maior que estoque disponível.'); q = available; }
+      carrinho[i].quantidade = q; salvarRender();
+    }
+    function removeItem(i){ if(!confirm('Remover este item?')) return; carrinho.splice(i,1); salvarRender(); }
+    function salvarRender(){ localStorage.setItem('carrinho', JSON.stringify(carrinho)); render(); }
+
+    function goToCheckout(){
+      // salva os itens que vão para checkout
+      localStorage.setItem('checkoutItems', JSON.stringify(carrinho));
+      // redireciona para página de checkout onde endereço/pagamento serão preenchidos
+      window.location.href = 'checkout.html';
     }
 
-    // seta quantidade ao digitar
-    function setQty(index, value) {
-      let q = parseInt(value);
-      if (isNaN(q) || q < 1) q = 1;
-      carrinho[index].quantidade = q;
-      salvarRender();
-    }
-
-    // remove item
-    function removeItem(index) {
-      if (!confirm('Remover este item do carrinho?')) return;
-      carrinho.splice(index, 1);
-      salvarRender();
-    }
-
-    // salva no localStorage e renderiza
-    function salvarRender() {
-      localStorage.setItem('carrinho', JSON.stringify(carrinho));
-      render();
-    }
-
-    // volta para produtos
-    function continuarComprando() {
-      window.location.href = 'produtos.html';
-    }
-
-    // mostra inputs extras dependendo do método (simulação)
-    function renderPagamentoExtra() {
-      const metodo = document.getElementById('metodoPagamento').value;
-      const box = document.getElementById('pagamento-extra');
-      if (metodo === 'cartao') {
-        box.innerHTML = `
-          <div class="mb-2">
-            <label class="form-label">Nome no cartão</label>
-            <input type="text" id="cartao-nome" class="form-control" placeholder="Nome impresso no cartão">
-          </div>
-          <div class="row">
-            <div class="col">
-              <label class="form-label">Número do cartão</label>
-              <input type="text" id="cartao-num" class="form-control" placeholder="1234 5678 9012 3456">
-            </div>
-            <div class="col-4">
-              <label class="form-label">Validade</label>
-              <input type="text" id="cartao-validade" class="form-control" placeholder="MM/AA">
-            </div>
-          </div>
-        `;
-      } else if (metodo === 'pix') {
-        box.innerHTML = `
-          <p class="mb-1">Use o PIX para transferir. Chave: <strong>pagamentos@pangolesgames.com</strong></p>
-          <p class="text-muted small">Após confirmar, simule a transferência.</p>
-        `;
-      } else {
-        box.innerHTML = `
-          <p class="mb-1">Será gerado um boleto. Você poderá imprimir ou salvar o PDF.</p>
-          <p class="text-muted small">O prazo de compensação varia conforme o banco.</p>
-        `;
-      }
-    }
-
-    // confirmar compra (simulação)
-    function confirmarCompra() {
-      if (!carrinho.length) {
-        alert('Carrinho vazio.');
-        return;
-      }
-
-      const metodo = document.getElementById('metodoPagamento').value;
-
-      // exemplo: leitura dos dados do cartão (apenas simulação - não armazene cartão real assim!)
-      if (metodo === 'cartao') {
-        const nomeCartao = document.getElementById('cartao-nome').value;
-        const numCartao = document.getElementById('cartao-num').value;
-        if (!nomeCartao || !numCartao) {
-          alert('Preencha os dados do cartão (simulação).');
-          return;
-        }
-      }
-
-      // Criar resumo para mostrar ao usuário antes de finalizar
-      let resumo = 'Compra confirmada!\n\nItens:\n';
-      carrinho.forEach(i => resumo += `- ${i.nome} x${i.quantidade} — R$ ${brl(i.preco * i.quantidade)}\n`);
-      const total = carrinho.reduce((acc, it) => acc + it.preco * it.quantidade, 0);
-      resumo += `\nTotal: R$ ${brl(total)}\n\nMétodo: ${metodo.toUpperCase()}\n\nObrigado por comprar na PangolesGames!`;
-
-      // mostra resumo (poderia abrir modal bonitinho em vez de alert)
-      alert(resumo);
-
-      // limpar carrinho (simulação de finalização)
-      localStorage.removeItem('carrinho');
-      carrinho = [];
-      render();
-
-      // redireciona para página de agradecimento ou home
-      window.location.href = 'index.html';
-    }
-
-    // inicial render
     render();
   </script>
 </body>
