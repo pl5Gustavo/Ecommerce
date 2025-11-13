@@ -57,28 +57,50 @@
 
   <script>
     const produtos = [
-      { nome: "PlayStation 5", preco: 3300, categoria: "PlayStation", estoque: 20 },
-      { nome: "Xbox Series X", preco: 5000, categoria: "Xbox", estoque: 20 },
-      { nome: "Nintendo Switch 2", preco: 4300, categoria: "Nintendo", estoque: 20 }
-    ];
+  { 
+    nome: "PlayStation 5", 
+    preco: 3300, 
+    categoria: "PlayStation", 
+    estoque: 20, 
+    imagem: "IMG/ps5.jpg" 
+  },
+  { 
+    nome: "Xbox Series X", 
+    preco: 5000, 
+    categoria: "Xbox", 
+    estoque: 20, 
+    imagem: "IMG/xbox.png" 
+  },
+  { 
+    nome: "Nintendo Switch 2", 
+    preco: 4300, 
+    categoria: "Nintendo", 
+    estoque: 20, 
+    imagem: "IMG/nintendo.jpg" 
+  }
+];
 
-    function exibirProdutos(lista) {
-      const container = document.getElementById("listaProdutos");
-      container.innerHTML = "";
-      lista.forEach(p => {
-        container.innerHTML += `
-          <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm text-center">
-              <div class="card-body">
-                <h5 class="card-title fw-bold">${p.nome}</h5>
-                <p class="text-muted">R$ ${p.preco.toFixed(2)}</p>
-                <p><strong>Estoque:</strong> ${p.estoque} unidades</p>
-                <a href="carrinho.html" class="btn btn-outline-primary btn-sm">Adicionar ao carrinho</a>
-              </div>
-            </div>
-          </div>`;
-      });
-    }
+
+function exibirProdutos(lista) {
+  const container = document.getElementById("listaProdutos");
+  container.innerHTML = "";
+  lista.forEach(p => {
+    container.innerHTML += `
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm text-center">
+          <img src="${p.imagem}" alt="${p.nome}" class="card-img-top" style="height: 200px; object-fit: contain;">
+          <div class="card-body">
+            <h5 class="card-title fw-bold">${p.nome}</h5>
+            <p class="text-muted">R$ ${p.preco.toFixed(2)}</p>
+            <p><strong>Estoque:</strong> ${p.estoque} unidades</p>
+            <button class="btn btn-outline-primary btn-sm" onclick="adicionarAoCarrinho('${p.nome}', ${p.preco}, '${p.imagem}')">Adicionar ao carrinho</button>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+
 
     function filtrarProdutos() {
       const categoria = document.getElementById("categoria").value;
@@ -101,7 +123,51 @@
 
     // Exibe todos ao carregar
     exibirProdutos(produtos);
+    function adicionarAoCarrinho(nome, preco) {
+  // Cria o item do produto
+  const produto = { nome, preco };
+
+  // Pega o carrinho do localStorage (ou cria um novo)
+  let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+
+  // Adiciona o produto
+  carrinho.push(produto);
+
+  // Salva novamente no localStorage
+  localStorage.setItem('carrinho', JSON.stringify(carrinho));
+
+  // Confirmação para o usuário
+  alert(`${nome} foi adicionado ao carrinho!`);
+  window.location.href = "carrinho.html";
+}
+
   </script>
+<script>
+  // Adiciona produto ao carrinho no localStorage
+  function adicionarAoCarrinho(nome, preco, imagem) {
+    // carrinho: array de {nome, preco, imagem, quantidade}
+    let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+
+    // procura se o produto já existe (mesmo nome)
+    const idx = carrinho.findIndex(item => item.nome === nome);
+
+    if (idx > -1) {
+      // se já existe, apenas incrementa a quantidade (se ainda tiver estoque)
+      carrinho[idx].quantidade += 1;
+    } else {
+      // adiciona com quantidade inicial 1
+      carrinho.push({ nome, preco, imagem, quantidade: 1 });
+    }
+
+    // salva no localStorage
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+
+    // opcional: feedback antes de ir para o carrinho
+    // alert(`${nome} adicionado ao carrinho.`);
+    // redireciona para carrinho
+    window.location.href = 'carrinho.html';
+  }
+</script>
 
 </body>
 </html>
