@@ -7,52 +7,50 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    
-    <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
-      <img src="IMG/banner.png" height="40" class="me-2" style="border-radius:5px;">
-      PangolesGames
-    </a>
+    <div class="container">
+      <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
+        <img src="IMG/banner.png" height="40" class="me-2" style="border-radius:5px;">
+        PangolesGames
+      </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
+          <li class="nav-item"><a class="nav-link" href="produtos.html">Produtos</a></li>
+          <li class="nav-item"><a class="nav-link" href="busca.html">Busca</a></li>
+          <li class="nav-item"><a class="nav-link active" href="carrinho.html">Carrinho</a></li>
 
-        <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
-        <li class="nav-item"><a class="nav-link" href="produtos.html">Produtos</a></li>
-        <li class="nav-item"><a class="nav-link" href="busca.html">Busca</a></li>
-        <li class="nav-item"><a class="nav-link" href="carrinho.html">Carrinho</a></li>
-
-        
-        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-        <li class="nav-item"><a class="nav-link" href="registro.html">Registrar-se</a></li>
-
-      </ul>
+          <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="registro.html">Registrar-se</a></li>
+        </ul>
+      </div>
     </div>
-
-  </div>
-</nav>
-
-
+  </nav>
 
   <!-- Conteúdo principal -->
   <main class="container py-5">
     <h1 class="text-center fw-bold mb-4">🛒 Seu Carrinho</h1>
     <div id="cart-area"></div>
-
     <div id="checkout-area" class="mt-4"></div>
   </main>
 
   <footer class="bg-dark text-white text-center py-3 mt-5">© 2025 PangolesGames</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
-    function brl(n){ return n.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});}
+
+    function brl(n){ 
+      return n.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+
     let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
     const cartArea = document.getElementById('cart-area');
     const checkoutArea = document.getElementById('checkout-area');
@@ -63,28 +61,47 @@
         checkoutArea.innerHTML = '';
         return;
       }
+
       let total = 0;
-      let html = `<div class="table-responsive"><table class="table align-middle"><thead class="table-dark"><tr><th>Produto</th><th>Preço unit.</th><th>Qtd</th><th>Subtotal</th><th></th></tr></thead><tbody>`;
+      let html = `
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Produto</th>
+                <th>Preço</th>
+                <th>Qtd</th>
+                <th>Subtotal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>`;
+
       carrinho.forEach((it, idx) => {
         const subtotal = it.preco * it.quantidade;
         total += subtotal;
-        html += `<tr>
-          <td style="width:40%;"><div class="d-flex align-items-center">
-            <img src="${it.imagem}" alt="${it.nome}" style="height:64px; width:64px; object-fit:contain;" class="me-3">
-            <div class="fw-bold">${it.nome}</div>
-          </div></td>
-          <td>R$ ${brl(it.preco)}</td>
-          <td>
-            <div class="d-flex align-items-center">
-              <button class="btn btn-sm btn-outline-secondary me-2" onclick="changeQty(${idx}, -1)">−</button>
-              <input type="number" min="1" value="${it.quantidade}" onchange="setQty(${idx}, this.value)" class="form-control form-control-sm text-center" style="width:80px;">
-              <button class="btn btn-sm btn-outline-secondary ms-2" onclick="changeQty(${idx}, +1)">+</button>
-            </div>
-          </td>
-          <td>R$ ${brl(subtotal)}</td>
-          <td><button class="btn btn-sm btn-danger" onclick="removeItem(${idx})">Remover</button></td>
-        </tr>`;
+
+        html += `
+          <tr>
+            <td style="width:40%;">
+              <div class="d-flex align-items-center">
+                <img src="${it.imagem}" style="height:64px;width:64px;object-fit:contain;" class="me-3">
+                <span class="fw-bold">${it.nome}</span>
+              </div>
+            </td>
+            <td>R$ ${brl(it.preco)}</td>
+            <td>
+              <div class="d-flex align-items-center">
+                <button class="btn btn-sm btn-outline-secondary me-2" onclick="changeQty(${idx}, -1)">−</button>
+                <input type="number" min="1" value="${it.quantidade}" onchange="setQty(${idx}, this.value)" class="form-control form-control-sm text-center" style="width:80px;">
+                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="changeQty(${idx}, +1)">+</button>
+              </div>
+            </td>
+            <td>R$ ${brl(subtotal)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="removeItem(${idx})">Remover</button></td>
+          </tr>`;
       });
+
       html += `</tbody></table></div>`;
       cartArea.innerHTML = html;
 
@@ -106,30 +123,44 @@
     function changeQty(i, delta) {
       let q = carrinho[i].quantidade + delta;
       if (q < 1) return;
-      // checar estoque local: pega estoque do localStorage
-      const estoque = JSON.parse(localStorage.getItem('estoque')) || {};
-      const available = estoque[carrinho[i].id] ?? 0;
-      if (q > available) { alert('Quantidade maior que estoque disponível.'); return; }
-      carrinho[i].quantidade = q; salvarRender();
+      carrinho[i].quantidade = q;
+      salvarRender();
     }
-    function setQty(i, v) {
-      let q = parseInt(v); if (isNaN(q) || q < 1) q = 1;
-      const estoque = JSON.parse(localStorage.getItem('estoque')) || {};
-      const available = estoque[carrinho[i].id] ?? 0;
-      if (q > available) { alert('Quantidade maior que estoque disponível.'); q = available; }
-      carrinho[i].quantidade = q; salvarRender();
-    }
-    function removeItem(i){ if(!confirm('Remover este item?')) return; carrinho.splice(i,1); salvarRender(); }
-    function salvarRender(){ localStorage.setItem('carrinho', JSON.stringify(carrinho)); render(); }
 
+    function setQty(i, v) {
+      let q = parseInt(v);
+      if (isNaN(q) || q < 1) q = 1;
+      carrinho[i].quantidade = q;
+      salvarRender();
+    }
+
+    function removeItem(i){
+      if(!confirm('Remover este item?')) return;
+      carrinho.splice(i,1);
+      salvarRender();
+    }
+
+    function salvarRender(){
+      localStorage.setItem('carrinho', JSON.stringify(carrinho));
+      render();
+    }
+
+    // 🔥 AQUI ESTÁ A CORREÇÃO FINAL — OBRIGA LOGIN 🔥
     function goToCheckout(){
-      // salva os itens que vão para checkout
-      localStorage.setItem('checkoutItems', JSON.stringify(carrinho));
-      // redireciona para página de checkout onde endereço/pagamento serão preenchidos
-      window.location.href = 'checkout.html';
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+      if (!currentUser) {
+        alert("Você precisa estar logado para finalizar a compra.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      localStorage.setItem("checkoutItems", JSON.stringify(carrinho));
+      window.location.href = "checkout.html";
     }
 
     render();
   </script>
+
 </body>
 </html>
