@@ -2,115 +2,298 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Painel do Vendedor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Administrador</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
+<script>
+// PROTEÇÃO – só admin pode acessar
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+if (!currentUser || currentUser.role !== "vendedor") {
+    alert("Acesso negado.");
+    window.location.href = "index.html";
+}
+</script>
+
 <nav class="navbar navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="index.html">PangolesGames</a>
+    <span class="navbar-brand fw-bold">Painel do Administrador</span>
+    <a href="index.html" class="btn btn-light btn-sm">Voltar à Loja</a>
   </div>
 </nav>
 
-<div class="container py-5">
-  <h1 class="text-center fw-bold mb-4">Painel do Vendedor</h1>
+<div class="container py-4">
 
-  <div class="d-flex gap-3 mb-4">
-    <button class="btn btn-primary" onclick="mostrarPedidos()">📦 Ver Pedidos</button>
-    <button class="btn btn-success" onclick="mostrarCadastroProduto()">➕ Cadastrar Produto</button>
+  <!-- CADASTRAR PRODUTO -->
+  <h2 class="fw-bold mb-3">Cadastrar Produto</h2>
+
+  <div class="card p-3 mb-4">
+    <form id="form-produto">
+      <div class="row g-3">
+
+        <div class="col-md-4">
+          <label class="form-label">Nome</label>
+          <input type="text" id="nome" class="form-control" required>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Preço</label>
+          <input type="number" id="preco" class="form-control" required>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Categoria</label>
+          <select id="categoria" class="form-select" required>
+            <option value="PlayStation">PlayStation</option>
+            <option value="Xbox">Xbox</option>
+            <option value="Nintendo">Nintendo</option>
+          </select>
+        </div>
+
+        <!-- UPLOAD DE IMAGEM -->
+        <div class="col-md-6">
+          <label class="form-label">Imagem (upload)</label>
+          <input type="file" id="imagem-upload" class="form-control" accept="image/*">
+          <img id="preview" src="" class="mt-2" style="max-height:120px; display:none;">
+        </div>
+
+        <!-- URL DE IMAGEM -->
+        <div class="col-md-6">
+          <label class="form-label">Ou usar URL</label>
+          <input type="text" id="imagem-url" class="form-control" placeholder="IMG/exemplo.jpg">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Estoque Inicial</label>
+          <input type="number" id="estoque" class="form-control" required>
+        </div>
+
+      </div>
+
+      <button class="btn btn-success w-100 mt-3" type="submit">Salvar Produto</button>
+    </form>
   </div>
 
-  <div id="conteudo"></div>
+  <hr>
+
+  <!-- PRODUTOS -->
+  <h2 class="fw-bold mb-3">Produtos Cadastrados</h2>
+  <div id="lista-produtos" class="row g-3"></div>
+
+  <hr class="my-4">
+
+  <!-- PEDIDOS -->
+  <h2 class="fw-bold mb-3">Pedidos Realizados</h2>
+  <div id="lista-pedidos"></div>
+
 </div>
 
 <script>
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  if (!currentUser || currentUser.email !== "admin@admin.com") {
-    alert("Acesso negado.");
-    window.location.href = "login.html";
-  }
-
-  function mostrarPedidos() {
-    const pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
-    let html = "<h3 class='mb-3'>Pedidos dos Clientes</h3>";
-
-    if (pedidos.length === 0) {
-      html += "<p class='text-muted'>Nenhum pedido realizado ainda.</p>";
-    } else {
-      pedidos.forEach(p => {
-        html += `
-          <div class="card mb-3 p-3">
-            <h5>Pedido #${p.id}</h5>
-            <p><strong>Cliente:</strong> ${p.cliente.nome} (${p.cliente.email})</p>
-            <p><strong>Endereço:</strong> ${p.cliente.endereco}</p>
-            <p><strong>Método:</strong> ${p.metodo}</p>
-            <p><strong>Total:</strong> R$ ${p.total.toFixed(2)}</p>
-            <h6>Itens:</h6>
-            <ul>
-              ${p.itens.map(i => `<li>${i.nome} — x${i.quantidade}</li>`).join("")}
-            </ul>
-          </div>
-        `;
-      });
+// =============== PREVIEW DA IMAGEM =================
+document.getElementById("imagem-upload").addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const preview = document.getElementById("preview");
+            preview.src = e.target.result;
+            preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
     }
+});
 
-    document.getElementById("conteudo").innerHTML = html;
-  }
-
-
-  function mostrarCadastroProduto() {
-    document.getElementById("conteudo").innerHTML = `
-      <h3 class="mb-3">Cadastrar Produto</h3>
-      <form onsubmit="salvarProduto(event)">
-        <div class="mb-3">
-          <label class="form-label">Nome</label>
-          <input id="pNome" class="form-control" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Preço</label>
-          <input id="pPreco" type="number" class="form-control" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">URL da Imagem</label>
-          <input id="pImg" class="form-control" placeholder="IMG/play5.png" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Estoque Inicial</label>
-          <input id="pEstoque" type="number" class="form-control" required>
-        </div>
-
-        <button class="btn btn-success mt-3">Salvar Produto</button>
-      </form>
-    `;
-  }
-
-
-  function salvarProduto(e) {
+// =============== SALVAR PRODUTO =====================
+document.getElementById("form-produto").addEventListener("submit", function(e){
     e.preventDefault();
 
-    const nome = document.getElementById("pNome").value.trim();
-    const preco = Number(document.getElementById("pPreco").value);
-    const img = document.getElementById("pImg").value.trim();
-    const estoqueInicial = Number(document.getElementById("pEstoque").value);
+    const nome = document.getElementById("nome").value.trim();
+    const preco = parseFloat(document.getElementById("preco").value);
+    const categoria = document.getElementById("categoria").value;
 
-    const produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+    const estoqueInicial = parseInt(document.getElementById("estoque").value);
 
-    const novoProduto = {
-      id: Date.now(),
-      nome,
-      preco,
-      img,
-      estoque: estoqueInicial
-    };
+    let imagemBase64 = document.getElementById("imagem-url").value.trim();
 
-    produtos.push(novoProduto);
-    localStorage.setItem("produtos", JSON.stringify(produtos));
+    const arquivo = document.getElementById("imagem-upload").files[0];
 
-    alert("Produto cadastrado com sucesso!");
+    if (arquivo) {
+        let reader = new FileReader();
+        reader.onload = function() {
+            salvarProduto(nome, preco, categoria, reader.result, estoqueInicial);
+        };
+        reader.readAsDataURL(arquivo);
+    } else {
+        if (!imagemBase64) {
+            alert("Envie uma imagem ou coloque uma URL!");
+            return;
+        }
+        salvarProduto(nome, preco, categoria, imagemBase64, estoqueInicial);
+    }
+});
 
-    mostrarPedidos();
-  }
+function salvarProduto(nome, preco, categoria, imagem, estoqueInicial) {
+    const produtosLS = JSON.parse(localStorage.getItem("produtos_cadastrados")) || [];
+    const estoqueLS = JSON.parse(localStorage.getItem("estoque")) || {};
+
+    const id = "prod_" + Date.now();
+
+    produtosLS.push({ id, nome, preco, categoria, imagem });
+    estoqueLS[id] = estoqueInicial;
+
+    localStorage.setItem("produtos_cadastrados", JSON.stringify(produtosLS));
+    localStorage.setItem("estoque", JSON.stringify(estoqueLS));
+
+    alert("Produto cadastrado!");
+
+    mostrarProdutos();
+}
+
+// ================== MOSTRAR PRODUTOS + EDITAR + EXCLUIR ==================
+function mostrarProdutos() {
+    const box = document.getElementById("lista-produtos");
+    const produtos = JSON.parse(localStorage.getItem("produtos_cadastrados")) || [];
+    const estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+
+    box.innerHTML = "";
+
+    if (produtos.length === 0) {
+        box.innerHTML = "<p class='text-muted'>Nenhum produto cadastrado ainda.</p>";
+        return;
+    }
+
+    produtos.forEach(p => {
+        box.innerHTML += `
+        <div class="col-md-4">
+            <div class="card p-3 text-center">
+
+              <img src="${p.imagem}" style="height:120px;object-fit:contain;">
+              <h5 class="mt-2">${p.nome}</h5>
+
+              <p><strong>Preço:</strong> R$ 
+                <input type="number" id="preco-${p.id}" 
+                  value="${p.preco}" class="form-control form-control-sm">
+              </p>
+
+              <p><strong>Estoque:</strong> 
+                <input type="number" id="estoque-${p.id}" 
+                  value="${estoque[p.id] ?? 0}" class="form-control form-control-sm">
+              </p>
+
+              <div class="d-flex gap-2 mt-2">
+                <button onclick="salvarEdicao('${p.id}')" class="btn btn-primary btn-sm w-50">
+                  Salvar
+                </button>
+
+                <button onclick="excluirProduto('${p.id}')" class="btn btn-danger btn-sm w-50">
+                  Excluir
+                </button>
+              </div>
+
+            </div>
+        </div>`;
+    });
+}
+
+// =============== SALVAR EDIÇÃO ==================
+function salvarEdicao(id) {
+    let produtos = JSON.parse(localStorage.getItem("produtos_cadastrados")) || [];
+    let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+
+    const novoPreco = parseFloat(document.getElementById(`preco-${id}`).value);
+    const novoEstoque = parseInt(document.getElementById(`estoque-${id}`).value);
+
+    const produto = produtos.find(p => p.id === id);
+    if (!produto) return;
+
+    produto.preco = novoPreco;
+    estoque[id] = novoEstoque;
+
+    localStorage.setItem("produtos_cadastrados", JSON.stringify(produtos));
+    localStorage.setItem("estoque", JSON.stringify(estoque));
+
+    alert("Alterações salvas!");
+    mostrarProdutos();
+}
+
+// =============== EXCLUIR PRODUTO ==================
+function excluirProduto(id) {
+    if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+
+    let produtos = JSON.parse(localStorage.getItem("produtos_cadastrados")) || [];
+    let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+
+    produtos = produtos.filter(p => p.id !== id);
+    delete estoque[id];
+
+    localStorage.setItem("produtos_cadastrados", JSON.stringify(produtos));
+    localStorage.setItem("estoque", JSON.stringify(estoque));
+
+    alert("Produto excluído!");
+    mostrarProdutos();
+}
+
+// ================= LISTAR PEDIDOS ===================
+function mostrarPedidos() {
+    const box = document.getElementById("lista-pedidos");
+    const pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+
+    box.innerHTML = "";
+
+    if (pedidos.length === 0) {
+        box.innerHTML = "<p class='text-muted'>Nenhum pedido realizado.</p>";
+        return;
+    }
+
+    pedidos.forEach(p => {
+      box.innerHTML += `
+        <div class="card p-3 mb-3">
+          <h5>Pedido #${p.id}</h5>
+
+          <p><strong>Email:</strong> ${p.email}</p>
+          <p><strong>Método:</strong> ${p.metodoPagamento}</p>
+          <p><strong>Endereço:</strong> ${p.endereco}</p>
+
+          <ul>${p.itens.map(i => `<li>${i.nome} x${i.quantidade}</li>`).join("")}</ul>
+          <p class="fw-bold">Total: R$ ${p.total.toFixed(2)}</p>
+
+          <label class="fw-bold mt-2">Status:</label>
+          <select id="status-${p.id}" class="form-select mb-2">
+            <option value="Pendente"  ${p.status === "Pendente" ? "selected" : ""}>Pendente</option>
+            <option value="Pago"      ${p.status === "Pago" ? "selected" : ""}>Pago</option>
+            <option value="Enviado"   ${p.status === "Enviado" ? "selected" : ""}>Enviado</option>
+            <option value="Entregue"  ${p.status === "Entregue" ? "selected" : ""}>Entregue</option>
+            <option value="Cancelado" ${p.status === "Cancelado" ? "selected" : ""}>Cancelado</option>
+          </select>
+
+          <button class="btn btn-primary" onclick="atualizarStatus(${p.id})">
+            Salvar Status
+          </button>
+        </div>
+      `;
+    });
+}
+
+function atualizarStatus(id) {
+    const select = document.getElementById("status-" + id);
+    const novoStatus = select.value;
+
+    let pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
+
+    const pedido = pedidos.find(p => p.id === id);
+    if (!pedido) return;
+
+    pedido.status = novoStatus;
+
+    localStorage.setItem("pedidos", JSON.stringify(pedidos));
+
+    alert("Status atualizado!");
+}
+
+mostrarProdutos();
+mostrarPedidos();
 </script>
 
 </body>
